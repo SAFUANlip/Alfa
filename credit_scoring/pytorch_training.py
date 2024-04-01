@@ -45,13 +45,31 @@ def train_epoch(model: torch.nn.Module, optimizer: torch.optim.Optimizer, datase
     for num_batch, batch in tqdm(enumerate(train_generator, start=1), desc="Training"):
         output = torch.flatten(model(batch["features"]))
         batch_loss = loss_function(output, batch["label"].float())
-        batch_loss.mean().backward()
+
+        weights_norm_1 = 0
+        for i, params in enumerate(model.parameters(), 0):
+            if i != 0:
+                weights_norm_1 += torch.norm(params, 1)
+        weights_norm_2 = 0
+        for i, params in enumerate(model.parameters(), 0):
+            if i != 0:
+                weights_norm_2 += torch.norm(params, 2)**2
+
+        batch_loss_vector = batch_loss
+
+        samples_counter += batch_loss_vector.size(0)
+
+        print(f"batch loss: {batch_loss.mean().item()}, weight L1: {torch.tensor(10e-5)*weights_norm_1}, weight L2: {torch.tensor(10e-4)*weights_norm_2}")
+        batch_loss = batch_loss.mean() + torch.tensor(10e-5)*weights_norm_1 + torch.tensor(10e-4)*weights_norm_2
+
+        batch_loss.backward()
+
         optimizer.step()
         optimizer.zero_grad()
 
-        samples_counter += batch_loss.size(0)
 
-        losses = torch.cat([losses, batch_loss], dim=0)
+
+        losses = torch.cat([losses, batch_loss_vector], dim=0)
         if num_batch % print_loss_every_n_batches == 0:
             print(f"Batches {num_batch - print_loss_every_n_batches + 1} - {num_batch} loss:"
                   f"{losses[-samples_counter:].mean()}", end="\r")

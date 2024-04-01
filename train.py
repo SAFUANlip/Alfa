@@ -91,7 +91,7 @@ def data_preprocess():
 
 def train():
 
-    SAVE_PATH_WEIGHT = 'C:/Users/User/Python/Alfa/weights/LSTM/'
+    SAVE_PATH_WEIGHT = 'C:/Users/User/Python/Alfa/weights/LSTM_weights_1_1/'
 
     dataset_train = sorted([os.path.join(TRAIN_BUCKETS_PATH, x) for x in os.listdir(TRAIN_BUCKETS_PATH)])
     dataset_val = sorted([os.path.join(VAL_BUCKETS_PATH, x) for x in os.listdir(VAL_BUCKETS_PATH)])
@@ -107,7 +107,7 @@ def train():
     with open("data_MliF/embedding_projections.json") as f_in:
         embedding_projections = json.load(f_in)
 
-    #model = CreditsGRU(features, embedding_projections).to(device)
+    model = CreditsGRU(features, embedding_projections, bidirectional=True).to(device)
     model = CreditsLSTM(features, embedding_projections, bidirectional=True).to(device)
     optimizer = torch.optim.Adam(lr=1e-3, params=model.parameters())
 
