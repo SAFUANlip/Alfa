@@ -53,7 +53,7 @@ class CreditsLSTM(nn.Module):
         self._credits_cat_embeddings = nn.ModuleList([self._create_embedding_projection(*embedding_projections[feature])
                                                       for feature in features])
 
-        self._gru = nn.LSTM(input_size=sum([embedding_projections[x][1] for x in features]),
+        self._lstm = nn.LSTM(input_size=sum([embedding_projections[x][1] for x in features]),
                            hidden_size=rnn_units, batch_first=True, bidirectional=bidirectional)
         self._hidden_size = rnn_units
         self._top_classifier = nn.Linear(
@@ -71,17 +71,29 @@ class CreditsLSTM(nn.Module):
         embeddings = [embedding(features[i]) for i, embedding in enumerate(self._credits_cat_embeddings)]
         concated_embeddings = torch.cat(embeddings, dim=-1)
 
-        #print(f"input {concated_embeddings.shape}")
+        print(f"input {concated_embeddings.shape}")
 
-        _, (last_hidden, _) = self._gru(concated_embeddings)
+        pooling_emb = nn.AdaptiveMaxPool2d((1, 128))(concated_embeddings.permute(0, 2, 1)).squeeze()
 
-        #print(f"last hidden {last_hidden.shape}\n")
+        _, (last_hidden, _) = self._lstm(concated_embeddings)
 
-        last_hidden = torch.reshape(
-            last_hidden.permute(1, 2, 0),
-            shape=(batch_size, self._hidden_size*2 if self.bidirectional else self._hidden_size))
+        print(f"last hidden {last_hidden.shape}\n")
 
-        classification_hidden = self._top_classifier(last_hidden)
+
+        # last_hidden = torch.reshape(
+        #     last_hidden.permute(1, 2, 0),
+        #     shape=(batch_size, self._hidden_size*2 if self.bidirectional else self._hidden_size))
+
+        # print(f"last hidden reshaped {last_hidden.shape}\n")
+
+        pooling_lstm = nn.AdaptiveMaxPool2d((1, 128))(last_hidden.permute(1, 0, 2)).squeeze()
+
+        print(f"emb pooling: {pooling_emb.shape}, LSTM pooling: {pooling_lstm.shape}")
+
+
+        pooling = torch.cat([pooling_emb, pooling_lstm], dim=-1)
+
+        classification_hidden = self._top_classifier(pooling)
         activation = self._intermediate_activation(classification_hidden)
         raw_output = self._head(activation)
         return raw_output

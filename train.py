@@ -107,7 +107,7 @@ def train():
     with open("data_MliF/embedding_projections.json") as f_in:
         embedding_projections = json.load(f_in)
 
-    model = CreditsGRU(features, embedding_projections, bidirectional=True).to(device)
+    #model = CreditsGRU(features, embedding_projections, bidirectional=True).to(device)
     model = CreditsLSTM(features, embedding_projections, bidirectional=True).to(device)
     optimizer = torch.optim.Adam(lr=1e-3, params=model.parameters())
 

@@ -59,15 +59,13 @@ def train_epoch(model: torch.nn.Module, optimizer: torch.optim.Optimizer, datase
 
         samples_counter += batch_loss_vector.size(0)
 
-        print(f"batch loss: {batch_loss.mean().item()}, weight L1: {torch.tensor(10e-5)*weights_norm_1}, weight L2: {torch.tensor(10e-4)*weights_norm_2}")
-        batch_loss = batch_loss.mean() + torch.tensor(10e-5)*weights_norm_1 + torch.tensor(10e-4)*weights_norm_2
+        print(f"batch loss: {batch_loss.mean().item()}, weight L1: {torch.tensor(0)*weights_norm_1}, weight L2: {torch.tensor(0)*weights_norm_2}")
+        batch_loss = batch_loss.mean() + torch.tensor(0)*weights_norm_1 + torch.tensor(0)*weights_norm_2
 
         batch_loss.backward()
 
         optimizer.step()
         optimizer.zero_grad()
-
-
 
         losses = torch.cat([losses, batch_loss_vector], dim=0)
         if num_batch % print_loss_every_n_batches == 0:
