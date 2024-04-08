@@ -71,13 +71,13 @@ class CreditsLSTM(nn.Module):
         embeddings = [embedding(features[i]) for i, embedding in enumerate(self._credits_cat_embeddings)]
         concated_embeddings = torch.cat(embeddings, dim=-1)
 
-        print(f"input {concated_embeddings.shape}")
+        #print(f"input {concated_embeddings.shape}")
 
         pooling_emb = nn.AdaptiveMaxPool2d((1, 128))(concated_embeddings.permute(0, 2, 1)).squeeze()
 
         _, (last_hidden, _) = self._lstm(concated_embeddings)
 
-        print(f"last hidden {last_hidden.shape}\n")
+        #print(f"last hidden {last_hidden.shape}\n")
 
 
         # last_hidden = torch.reshape(
@@ -88,7 +88,7 @@ class CreditsLSTM(nn.Module):
 
         pooling_lstm = nn.AdaptiveMaxPool2d((1, 128))(last_hidden.permute(1, 0, 2)).squeeze()
 
-        print(f"emb pooling: {pooling_emb.shape}, LSTM pooling: {pooling_lstm.shape}")
+        #print(f"emb pooling: {pooling_emb.shape}, LSTM pooling: {pooling_lstm.shape}")
 
 
         pooling = torch.cat([pooling_emb, pooling_lstm], dim=-1)

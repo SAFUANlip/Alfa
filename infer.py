@@ -21,10 +21,12 @@ def infer():
 
     model = CreditsLSTM(features, embedding_projections, bidirectional=True).to(device)
 
-    path_to_checkpoints = "C:/Users/User/Python/Alfa/weights/LSTM/"
+    path_to_checkpoints = "C:/Users/User/Python/Alfa/weights/LSTM_weights_1_1_lr-4/"
+
     model.load_state_dict(torch.load(os.path.join(path_to_checkpoints, "best_checkpoint.pt")))
+
     test_preds = inference(model, dataset_test, batch_size=128, device=device)
-    test_preds.to_csv("LSTM_submission.csv", index=None)
+    test_preds.to_csv("results/best.csv", index=None)
 
 
 if __name__ == "__main__":

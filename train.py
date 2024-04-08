@@ -3,6 +3,7 @@ import torch
 import os
 from tqdm import tqdm
 import json
+from pathlib import Path
 
 from sklearn.model_selection import train_test_split
 from credit_scoring.utils import read_parquet_dataset_from_local
@@ -91,8 +92,9 @@ def data_preprocess():
 
 def train():
 
-    SAVE_PATH_WEIGHT = 'C:/Users/User/Python/Alfa/weights/LSTM_weights_1_1/'
-
+    SAVE_PATH_WEIGHT = 'C:/Users/User/Python/Alfa/weights/LSTM_weights_1_1_lr-4/'
+    if not Path.exists(Path(SAVE_PATH_WEIGHT)):
+        Path(SAVE_PATH_WEIGHT).mkdir(parents=True, exist_ok=True)
     dataset_train = sorted([os.path.join(TRAIN_BUCKETS_PATH, x) for x in os.listdir(TRAIN_BUCKETS_PATH)])
     dataset_val = sorted([os.path.join(VAL_BUCKETS_PATH, x) for x in os.listdir(VAL_BUCKETS_PATH)])
 
@@ -109,7 +111,7 @@ def train():
 
     #model = CreditsGRU(features, embedding_projections, bidirectional=True).to(device)
     model = CreditsLSTM(features, embedding_projections, bidirectional=True).to(device)
-    optimizer = torch.optim.Adam(lr=1e-3, params=model.parameters())
+    optimizer = torch.optim.Adam(lr=1e-4, params=model.parameters())
 
     for epoch in range(num_epochs):
         train_epoch(model, optimizer, dataset_train, batch_size=train_batch_size,
